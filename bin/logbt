@@ -80,7 +80,7 @@ function process_core() {
   if [[ $(uname -s) == 'Darwin' ]]; then
     lldb --file $1 --core $2 --batch -o 'thread backtrace all' -o 'quit'
   else
-    gdb $1 $2 -ex "set pagination 0" -ex "thread apply all bt" --batch
+    gdb $1 $2 -ex "set pagination 0" -ex "thread apply all bt full" --batch
   fi
   # note: on OS X the -f avoids a hang on prompt 'remove write-protected regular file?'
   rm -f ${2}
