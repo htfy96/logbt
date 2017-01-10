@@ -1,70 +1,15 @@
-before_install_linux: &linux_setup
-  - mkdir mason && curl -sSfL https://github.com/mapbox/mason/archive/v0.2.0.tar.gz | tar --gunzip --extract --strip-components=1 --directory=./mason
-  - ./mason/mason install gdb 7.12
-  - sudo ln -s $(./mason/mason prefix gdb 7.12)/bin/gdb /usr/local/bin/gdb
-  - which gdb
-  # To ensure that the --setup command is working we start off by
-  # manually creating a bogus core pattern
-  - sudo bash -c 'echo "dummy" > /proc/sys/kernel/core_pattern'
+language: generic
 
-before_install_osx: &osx_setup
-  # To ensure that the --setup command is working we start off by
-  # manually creating a bogus core pattern
-  - sudo sysctl kern.corefile=dummy
+sudo: required
 
-matrix:
-  include:
-    - os: linux
-      language: generic
-      sudo: required
-      dist: precise
-      env: CXX=clang++
-      before_install: *linux_setup
-      before_script:
-        - ./mason/mason install clang++ 3.8.1
-        - sudo ln -s $(./mason/mason prefix clang++ 3.8.1)/bin/clang++ /usr/local/bin/clang++
-        - which clang++
-    - os: linux
-      language: generic
-      sudo: required
-      dist: trusty
-      env: CXX=g++-5
-      before_install: *linux_setup
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'g++-5']
-    - os: linux
-      language: generic
-      sudo: required
-      dist: trusty
-      env: CXX=g++-6
-      before_install: *linux_setup
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test']
-          packages: [ 'g++-6']
-    - os: linux
-      language: generic
-      sudo: true
-      dist: precise
-      env: CXX=g++
-      before_install: *linux_setup
-    - os: osx
-      language: generic
-      before_install: *osx_setup
+services:
+  - docker
 
 install:
-  - nvm unload || true
-  - rm -rf ~/.nvm/ && git clone --depth 1 https://github.com/creationix/nvm.git ~/.nvm/
-  - source ~/.nvm/nvm.sh
-  - nvm install 4
-  - nvm use 4
-  - node --version
-  - npm --version
-  - which node
+  - docker info
+  - cat /proc/sys/kernel/core_pattern
+  - docker build --rm=false -t logbt-precise -f Dockerfile.ubuntu-precise .
 
 script:
- - sudo ./bin/logbt --setup
- - ./bin/logbt --test
- - ./test/unit.sh
+  - sudo docker run --privileged logbt-precise
+  - cat /proc/sys/kernel/core_pattern
