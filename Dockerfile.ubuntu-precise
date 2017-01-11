@@ -13,10 +13,7 @@ RUN apt-get update -y && \
  . ~/.nvm/nvm.sh && \
  nvm install 4
 
-CMD ./bin/logbt --setup && \
-    sysctl -w net.core.somaxconn=1024 && \
-    sysctl -a | grep somaxconn && \
-    ./bin/logbt --test && \
+CMD ./bin/logbt --test && \
     . ~/.nvm/nvm.sh && \
     nvm use 4 && \
     ./test/unit.sh
