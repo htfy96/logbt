@@ -8,8 +8,10 @@ services:
 install:
   - docker info
   - cat /proc/sys/kernel/core_pattern
+  - sysctl -a | grep somaxconn
   - docker build --rm=false -t logbt-precise -f Dockerfile.ubuntu-precise .
 
 script:
   - sudo docker run --privileged logbt-precise
+  - sysctl -a | grep somaxconn
   - cat /proc/sys/kernel/core_pattern
