@@ -204,7 +204,7 @@ function setup_and_exit() {
   local settable_core_pattern=$(get_target_core_pattern)
   if [[ ${PLATFORM_UNAME} == "Linux" ]]; then
     echo "Setting $(cat /proc/sys/kernel/core_pattern) -> ${settable_core_pattern}"
-    echo "${settable_core_pattern}" > /proc/sys/kernel/core_pattern
+    echo "${settable_core_pattern}" > /writable-proc/sys/kernel/core_pattern
   elif [[ ${PLATFORM_UNAME} == "Darwin" ]]; then
     echo "Setting $(sysctl -n kern.corefile) -> ${settable_core_pattern}"
     sysctl kern.corefile=${settable_core_pattern}

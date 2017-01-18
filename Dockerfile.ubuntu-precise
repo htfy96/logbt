@@ -13,7 +13,9 @@ RUN apt-get update -y && \
  . ~/.nvm/nvm.sh && \
  nvm install 4
 
-CMD ./bin/logbt --setup && \
+CMD cat /proc/sys/kernel/core_pattern || true && \
+    cat /writable-proc/sys/kernel/core_pattern || true && \
+    ./bin/logbt --setup && \
     ./bin/logbt --test && \
     . ~/.nvm/nvm.sh && \
     nvm use 4 && \

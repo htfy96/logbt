@@ -60,6 +60,14 @@ matrix:
         - docker run --privileged logbt-precise
         - cat /proc/sys/kernel/core_pattern
     - os: linux
+      env: DOCKER=1
+      dist: trusty
+      sudo: required
+      script:
+        - docker build -t logbt-precise -f Dockerfile.ubuntu-precise .
+        - docker run -v /proc:/writable-proc logbt-precise
+        - cat /proc/sys/kernel/core_pattern
+    - os: linux
       dist: precise
       sudo: required
       env: CXX=clang++
