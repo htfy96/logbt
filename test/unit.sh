@@ -164,17 +164,30 @@ function main() {
     exit_early
 
     # test sending custom USR1 signal (158) to logbt
-    watcher_command="./bin/logbt --watch node test/wait.js 20"
+    watcher_command="./bin/logbt --watch node test/wait.js 200"
     # background logbt and grab its PID
     ${watcher_command} >${STDOUT_LOGS} 2>${STDERR_LOGS} & LOGBT_PID=$!
     echo -e "\033[1m\033[32mok\033[0m - ran ${watcher_command} >${STDOUT_LOGS} 2>${STDERR_LOGS}"
+    # clean out logs
+    echo "" > ${STDOUT_LOGS}
     sleep 1
+    # this should trigger a snapshot backtrace
     kill -USR1 ${LOGBT_PID}
+    sleep 4
+    assertContains "$(all_lines)" "node::Start" "Found expected line number in backtrace output"
+    # clean out logs again
+    echo "" > ${STDOUT_LOGS}
+    sleep 2
+    kill -USR1 ${LOGBT_PID}
+    sleep 4
+    assertContains "$(all_lines)" "node::Start" "Found expected line number in backtrace output"
+    kill -TERM ${LOGBT_PID}
     RESULT=0
-    wait ${LOGBT_PID} || export RESULT=$?
-    assertEqual "${RESULT}" "${USR1_CODE}" "emitted expected USR1 code"
-    assertContains "$(all_lines)" "[logbt] received signal:${USR1_CODE} (USR1)" "Found USR exit"
-    assertContains "$(all_lines)" "[logbt] sending SIGTERM to node" "Found SIGTERM send"
+    wait ${LOGBT_PID} || RESULT=$?
+    assertEqual "${RESULT}" "143" "emitted expected signal"
+    # should complete cleanly
+    assertContains "$(all_lines)" "forcing exit" "Node script finished as expected"
+    export CODE=1
     exit_early
 
     # run node process that segfaults after 1000ms
